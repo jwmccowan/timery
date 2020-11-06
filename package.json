@@ -1,0 +1,14 @@
+{
+  "name": "timery",
+  "version": "0.1.0",
+  "description": "Fantasy for nerds",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "jwm",
+  "license": "ISC",
+  "devDependencies": {
+    "pnpm": "^5.10.4"
+  }
+}
