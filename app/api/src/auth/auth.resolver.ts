@@ -27,14 +27,14 @@ export class AuthResolver {
   @UseGuards(GqlJwtAuthGuard)
   @Mutation(() => LogoutPayload)
   public async logout(
-    @CurrentUser() user: User,
+    @CurrentUser() { name }: User,
     @ResGql() res: Response,
   ): Promise<LogoutPayload> {
     res.cookie('access_token', '', {
       httpOnly: true,
       expires: new Date(0),
     });
-    return { name: '' };
+    return { name };
   }
 
   @Mutation(() => User)
