@@ -6,9 +6,11 @@ import { AppService } from './app.service';
 import { User } from './user/user.entity';
 import { UserModule } from './user/user.module';
 import { join } from 'path';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
+    AuthModule,
     GraphQLModule.forRoot({
       autoSchemaFile: join(process.cwd(), 'src/schema.graphql'),
       sortSchema: true,

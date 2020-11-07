@@ -4,7 +4,7 @@ import { Field, ObjectType } from '@nestjs/graphql';
 export type UserId = string & { __brand: 'UserId' };
 export const asUserId = (id: string): UserId => id as UserId;
 
-@Entity()
+@Entity('user')
 @ObjectType('user')
 export class User {
   @PrimaryColumn({ type: 'uuid' })
