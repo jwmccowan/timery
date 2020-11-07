@@ -12,6 +12,15 @@ import { join } from 'path';
     GraphQLModule.forRoot({
       autoSchemaFile: join(process.cwd(), 'src/schema.graphql'),
       sortSchema: true,
+      context: ({ req, res }) => ({ req, res }),
+      subscriptions: {
+        keepAlive: 5000,
+      },
+      playground: {
+        settings: {
+          'request.credentials': 'include',
+        },
+      },
     }),
     TypeOrmModule.forRoot({
       type: 'postgres',

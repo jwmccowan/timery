@@ -1,7 +1,8 @@
-import { Args, Mutation, Resolver } from '@nestjs/graphql';
+import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { Response } from 'express';
 import { User } from '../user/user.entity';
 import { AuthService } from './auth.service';
+import { CurrentUser } from './decorator/current-user';
 import { ResGql } from './decorator/res-gql.decorator';
 import { LoginInputDto } from './dto/login-input.dto';
 
@@ -16,6 +17,11 @@ export class AuthResolver {
   ): Promise<User> {
     const { access_token, user } = await this.authService.login(name, password);
     res.cookie('access_token', access_token, { httpOnly: true });
+    return user;
+  }
+
+  @Query(() => User)
+  async me(@CurrentUser() user: User): Promise<User> {
     return user;
   }
 }
