@@ -5,14 +5,22 @@
 input CreateUserDto {
   email: String!
   name: String!
+  password: String!
+}
+
+input LoginInputDto {
+  name: String!
+  password: String!
 }
 
 type Mutation {
   createUser(input: CreateUserDto!): user!
   deleteUser(id: String!): UserIdDto!
+  login(input: LoginInputDto!): user!
 }
 
 type Query {
+  me: user!
   user(id: String!): user!
   users: [user!]!
 }

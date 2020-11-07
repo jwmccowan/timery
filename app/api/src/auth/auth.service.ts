@@ -1,9 +1,11 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
+import { v4 as uuid } from 'uuid';
 import { UserService } from '../user/user.service';
 import { asUserId, User, UserId } from '../user/user.entity';
 import { PasswordService } from '../password/password.service';
 import { Token } from './model/token.model';
+import { CreateUserDto } from './dto/create-user.dto';
 
 @Injectable()
 export class AuthService {
@@ -19,7 +21,6 @@ export class AuthService {
   ): Promise<User> {
     const user = await this.userService.findOneByName(username);
 
-    // TODO: implement password service with an api something like:
     const passwordValid = this.passwordService.validatePassword(
       password,
       user.passwordHash,
@@ -57,5 +58,12 @@ export class AuthService {
       ...this.generateToken({ username: user.name, sub: user.id }),
       user,
     };
+  }
+
+  public async createUser({ password, ...rest }: CreateUserDto): Promise<User> {
+    const id = asUserId(uuid());
+    const passwordHash = await this.passwordService.hashPassword(password);
+
+    return this.userService.create({ ...rest, id, passwordHash });
   }
 }

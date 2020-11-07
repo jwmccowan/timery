@@ -1,9 +1,11 @@
+import { UseGuards } from '@nestjs/common';
 import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
-import { CreateUserDto } from './dto/create-user.dto';
+import { GqlJwtAuthGuard } from '../auth/guard/gql-jwt.guard';
 import { UserIdDto } from './dto/user-id.dto';
 import { User, UserId } from './user.entity';
 import { UserService } from './user.service';
 
+@UseGuards(GqlJwtAuthGuard)
 @Resolver(() => User)
 export class UserResolver {
   constructor(private userService: UserService) {}
@@ -24,12 +26,5 @@ export class UserResolver {
   ): Promise<UserIdDto> {
     await this.userService.remove(id);
     return { id };
-  }
-
-  @Mutation(() => User)
-  async createUser(
-    @Args('input', { type: () => CreateUserDto }) input: CreateUserDto,
-  ): Promise<User> {
-    return this.userService.create(input);
   }
 }

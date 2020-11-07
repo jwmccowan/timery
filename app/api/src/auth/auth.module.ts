@@ -1,12 +1,12 @@
 import { Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
-import { UserService } from '../user/user.service';
-import { PasswordService } from '../password/password.service';
+import { PasswordModule } from '../password/password.module';
 import { AuthService } from './auth.service';
 import { jwtConstants } from './constant';
 import { PassportModule } from '@nestjs/passport';
 import { AuthResolver } from './auth.resolver';
 import { GqlJwtAuthGuard } from './guard/gql-jwt.guard';
+import { UserModule } from '../user/user.module';
 import { JwtStrategy } from './strategy/jwt.strategy';
 
 @Module({
@@ -18,16 +18,10 @@ import { JwtStrategy } from './strategy/jwt.strategy';
     PassportModule.register({
       defaultStrategy: 'jwt',
     }),
-    PasswordService,
-    UserService,
+    PasswordModule,
+    UserModule,
   ],
-  providers: [
-    AuthResolver,
-    AuthService,
-    GqlJwtAuthGuard,
-    JwtStrategy,
-    UserService,
-  ],
+  providers: [AuthResolver, AuthService, GqlJwtAuthGuard, JwtStrategy],
   exports: [GqlJwtAuthGuard],
 })
 export class AuthModule {}

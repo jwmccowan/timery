@@ -7,6 +7,6 @@ export function getGqlResponse(context: ExecutionContext): any {
   return graphqlContext.getContext<CustomGraphQLContext>()?.res || null;
 }
 
-export const ResGql = createParamDecorator((_, context) => {
-  getGqlResponse(context);
-});
+export const ResGql = createParamDecorator((_, context) =>
+  getGqlResponse(context),
+);
