@@ -13,10 +13,15 @@ input LoginInputDto {
   password: String!
 }
 
+type LogoutPayload {
+  name: String!
+}
+
 type Mutation {
   createUser(input: CreateUserDto!): user!
   deleteUser(id: String!): UserIdDto!
   login(input: LoginInputDto!): user!
+  logout: LogoutPayload!
 }
 
 type Query {

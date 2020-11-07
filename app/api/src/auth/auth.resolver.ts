@@ -7,6 +7,7 @@ import { CurrentUser } from './decorator/current-user';
 import { ResGql } from './decorator/res-gql.decorator';
 import { CreateUserDto } from './dto/create-user.dto';
 import { LoginInputDto } from './dto/login-input.dto';
+import { LogoutPayload } from './dto/logout-payload.dto';
 import { GqlJwtAuthGuard } from './guard/gql-jwt.guard';
 
 @Resolver('Auth')
@@ -19,9 +20,21 @@ export class AuthResolver {
     @ResGql() res: Response,
   ): Promise<User> {
     const { access_token, user } = await this.authService.login(name, password);
-    console.log('eggs', res);
     res.cookie('access_token', access_token, { httpOnly: true });
     return user;
+  }
+
+  @UseGuards(GqlJwtAuthGuard)
+  @Mutation(() => LogoutPayload)
+  public async logout(
+    @CurrentUser() user: User,
+    @ResGql() res: Response,
+  ): Promise<LogoutPayload> {
+    res.cookie('access_token', '', {
+      httpOnly: true,
+      expires: new Date(0),
+    });
+    return { name: '' };
   }
 
   @Mutation(() => User)
