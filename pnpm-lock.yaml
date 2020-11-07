@@ -9,6 +9,7 @@ importers:
       '@nestjs/common': 7.5.1_0c773f197e7bb0df0bedc332ad8bc35d
       '@nestjs/core': 7.5.1_f526d5c8b242e8d14c11db9c93a8cb64
       '@nestjs/graphql': 7.7.0_5f8dee52cbec7fb09ccf1998e39ef29d
+      '@nestjs/jwt': 7.2.0_@nestjs+common@7.5.1
       '@nestjs/passport': 7.1.0_7052cefeb0dbf0ec2c2dff56d4f48092
       '@nestjs/platform-express': 7.5.1_4eb10253973eb0f1ed30caf11241816d
       apollo-server-express: 2.19.0_graphql@15.4.0
@@ -57,6 +58,7 @@ importers:
       '@nestjs/common': ^7.5.1
       '@nestjs/core': ^7.5.1
       '@nestjs/graphql': ^7.7.0
+      '@nestjs/jwt': ^7.2.0
       '@nestjs/passport': ^7.1.0
       '@nestjs/platform-express': ^7.5.1
       '@nestjs/schematics': ^7.1.3
@@ -1504,6 +1506,16 @@ packages:
       reflect-metadata: ^0.1.12
     resolution:
       integrity: sha512-CkiUEFjaOjn0nDqpBl2LC+4oAbMnWIx0aPL/QnT0JmYVdTPozHk1hMHTiDeI6zhCd7z/rff8hrpbjuXRRJZENQ==
+  /@nestjs/jwt/7.2.0_@nestjs+common@7.5.1:
+    dependencies:
+      '@nestjs/common': 7.5.1_0c773f197e7bb0df0bedc332ad8bc35d
+      '@types/jsonwebtoken': 8.5.0
+      jsonwebtoken: 8.5.1
+    dev: false
+    peerDependencies:
+      '@nestjs/common': ^6.0.0 || ^7.0.0
+    resolution:
+      integrity: sha512-uOTqYmWNpu+oS/MrdYjrWXtKGV4HkCYmAEVEFPP/KfiP/7K6fNy+boLllE6cnqESAXh9u0CLa1noAAavs+LHEQ==
   /@nestjs/mapped-types/0.1.0_fecb4e90636f5e060feff0717d7691d9:
     dependencies:
       '@nestjs/common': 7.5.1_0c773f197e7bb0df0bedc332ad8bc35d
@@ -1894,7 +1906,6 @@ packages:
   /@types/jsonwebtoken/8.5.0:
     dependencies:
       '@types/node': 14.14.6
-    dev: true
     resolution:
       integrity: sha512-9bVao7LvyorRGZCw0VmH/dr7Og+NdjYSsKAxB43OQoComFbBgsEpoR9JW6+qSq/ogwVBg8GI2MfAlk4SYI4OLg==
   /@types/keygrip/1.0.2:
