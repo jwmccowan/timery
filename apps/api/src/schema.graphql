@@ -8,16 +8,16 @@ input CreateUserDto {
 }
 
 type Mutation {
-  createUser(input: CreateUserDto!): User!
+  createUser(input: CreateUserDto!): user!
   deleteUser(id: String!): UserIdDto!
 }
 
 type Query {
-  user(id: String!): User!
-  users: [User!]!
+  user(id: String!): user!
+  users: [user!]!
 }
 
-type User {
+type user {
   email: String!
   id: String!
   isActive: Boolean!
