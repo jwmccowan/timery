@@ -5,18 +5,18 @@ import { Field, ObjectType } from '@nestjs/graphql';
 @ObjectType('User')
 export class User {
   @PrimaryColumn({ type: 'uuid' })
-  @Field((type) => String)
+  @Field(() => String)
   id!: string;
 
   @Column({ nullable: false })
-  @Field((type) => String)
+  @Field(() => String)
   name!: string;
 
   @Column({ nullable: false })
-  @Field((type) => String)
+  @Field(() => String)
   email!: string;
 
   @Column({ default: true, nullable: false })
-  @Field((type) => Boolean)
+  @Field(() => Boolean)
   isActive!: boolean;
 }

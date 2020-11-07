@@ -4,21 +4,21 @@ import { UserIdDto } from './dto/user-id.dto';
 import { User } from './user.entity';
 import { UserService } from './user.service';
 
-@Resolver((of) => User)
+@Resolver(() => User)
 export class UserResolver {
   constructor(private userService: UserService) {}
 
-  @Query((returns) => User)
+  @Query(() => User)
   async user(@Args('id', { type: () => String }) id: string): Promise<User> {
     return this.userService.findOne(id);
   }
 
-  @Query((returns) => [User])
+  @Query(() => [User])
   async users(): Promise<User[]> {
     return this.userService.findAll();
   }
 
-  @Mutation((returns) => UserIdDto)
+  @Mutation(() => UserIdDto)
   async deleteUser(
     @Args('id', { type: () => String }) id: string,
   ): Promise<UserIdDto> {
@@ -26,7 +26,7 @@ export class UserResolver {
     return { id };
   }
 
-  @Mutation((returns) => User)
+  @Mutation(() => User)
   async createUser(
     @Args('input', { type: () => CreateUserDto }) input: CreateUserDto,
   ): Promise<User> {
