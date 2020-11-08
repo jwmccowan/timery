@@ -1,0 +1,28 @@
+version: '3.7'
+services:
+  api:
+    container_name: api
+    build:
+      context: .
+      dockerfile: api.Dockerfile
+    ports:
+      - 3000:3000
+    depends_on:
+      - postgres
+    env_file:
+      - app/api/.env
+
+  postgres:
+    image: postgres:13
+    container_name: postgres
+    restart: always
+    ports:
+      - 54320:5432
+    env_file:
+      - app/api/.env
+    volumes:
+      - postgres_volume:/var/lib/postgresql/data
+
+volumes:
+  postgres_volume:
+    name: timery-db
