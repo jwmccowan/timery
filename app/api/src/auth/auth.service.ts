@@ -33,7 +33,9 @@ export class AuthService {
 
   public async validateUserById(id: UserId): Promise<User> {
     try {
-      return this.userService.findOne(id);
+      // need to await to catch the not found error in case, u no... not found
+      const user = await this.userService.findOne(id);
+      return user;
     } catch (e) {
       throw new UnauthorizedException('Authentication validation error');
     }
@@ -52,7 +54,13 @@ export class AuthService {
     username: string,
     password: string,
   ): Promise<Token & { user: User }> {
-    const user = await this.validateUserByPassword(username, password);
+    let user;
+
+    try {
+      user = await this.validateUserByPassword(username, password);
+    } catch (e) {
+      throw new UnauthorizedException('Authentication validation error');
+    }
 
     return {
       ...this.generateToken({ username: user.name, sub: user.id }),

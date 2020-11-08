@@ -1,4 +1,4 @@
-import { UseGuards } from '@nestjs/common';
+import { NotFoundException, UseGuards } from '@nestjs/common';
 import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { GqlJwtAuthGuard } from '../auth/guard/gql-jwt.guard';
 import { UserIdDto } from './dto/user-id.dto';
@@ -24,7 +24,10 @@ export class UserResolver {
   async deleteUser(
     @Args('id', { type: () => String }) id: UserId,
   ): Promise<UserIdDto> {
-    await this.userService.remove(id);
+    const success = await this.userService.remove(id);
+    if (!success) {
+      throw new NotFoundException('User not found - nothing was deleted');
+    }
     return { id };
   }
 }

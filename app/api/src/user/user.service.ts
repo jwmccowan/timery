@@ -54,8 +54,8 @@ export class UserService {
    * TODO: always returns true
    */
   public async remove(id: UserId): Promise<boolean> {
-    await this.userRepository.delete(id);
-    return true;
+    const result = await this.userRepository.delete(id);
+    return !!result.affected && result.affected > 0;
   }
 
   public async create(user: Omit<User, 'isActive'>): Promise<User> {
