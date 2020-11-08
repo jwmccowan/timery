@@ -8,7 +8,10 @@
   },
   "author": "jwm",
   "license": "ISC",
-  "devDependencies": {
-    "pnpm": "^5.10.4"
-  }
+  "private": true,
+  "workspaces": [
+    "lib/**",
+    "app/**"
+  ],
+  "devDependencies": {}
 }
