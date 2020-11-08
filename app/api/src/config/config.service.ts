@@ -10,6 +10,7 @@ export default interface EnvConfig {
 
 const keys = [
   'APP_PORT',
+  'JWT_SECRET',
   'TYPEORM_CONNECTION',
   'TYPEORM_HOST',
   'TYPEORM_USERNAME',
@@ -34,7 +35,7 @@ export class ConfigService {
     const baseDir = path.join(__dirname, '../');
     const entitiesPath = `${baseDir}**/*.entity.js`;
     // const migrationPath = `${baseDir}${this.envConfig.TYPEORM_MIGRATIONS}`;
-    const blah = {
+    return {
       type: this.envConfig.TYPEORM_CONNECTION as 'postgres',
       host: this.envConfig.TYPEORM_HOST,
       port: Number.parseInt(this.envConfig.TYPEORM_PORT, 10),
@@ -49,8 +50,6 @@ export class ConfigService {
       //   entitiesDir: 'src/**/*.entity.ts',
       // },
     };
-    console.log('eggs', blah);
-    return blah;
   }
 
   private initializeConfig(): EnvConfig {
