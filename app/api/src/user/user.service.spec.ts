@@ -23,10 +23,6 @@ const userArray: User[] = [
 
 const oneUser: User = { ...userArray[0] };
 
-const isUserId = (arg: any): arg is UserId => {
-  return typeof arg === 'string';
-};
-
 describe('UserService', () => {
   let service: UserService;
   let repo: Repository<User>;
