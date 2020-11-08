@@ -22,8 +22,9 @@ export class UserService {
     return this.userRepository.findOneOrFail({ name });
   }
 
-  public async remove(id: UserId): Promise<void> {
+  public async remove(id: UserId): Promise<boolean> {
     await this.userRepository.delete(id);
+    return true;
   }
 
   public async create(user: Omit<User, 'isActive'>): Promise<User> {
