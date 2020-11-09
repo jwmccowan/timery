@@ -57,5 +57,6 @@ export class User {
   public updatedAt!: Date;
 
   @DeleteDateColumn()
+  // No GQL Field since it shouldn't ever be not null if queried
   public deletedAt?: Date;
 }
