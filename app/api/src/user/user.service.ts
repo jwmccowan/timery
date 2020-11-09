@@ -54,11 +54,13 @@ export class UserService {
    * TODO: always returns true
    */
   public async remove(id: UserId): Promise<boolean> {
-    const result = await this.userRepository.delete(id);
+    const result = await this.userRepository.softDelete(id);
     return !!result.affected && result.affected > 0;
   }
 
-  public async create(user: Omit<User, 'isActive'>): Promise<User> {
+  public async create(
+    user: Pick<User, 'id' | 'passwordHash' | 'name' | 'email'>,
+  ): Promise<User> {
     return this.userRepository.save({ ...user, isActive: true });
   }
 }

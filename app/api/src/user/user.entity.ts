@@ -1,4 +1,11 @@
-import { Column, Entity, PrimaryColumn } from 'typeorm';
+import {
+  Column,
+  CreateDateColumn,
+  DeleteDateColumn,
+  Entity,
+  PrimaryColumn,
+  UpdateDateColumn,
+} from 'typeorm';
 import { Field, ObjectType } from '@nestjs/graphql';
 /**
  * UserId: a special wrapper for string to let us know this is a UserId
@@ -40,4 +47,15 @@ export class User {
   @Column({ nullable: false })
   // No GQL Field since we want it in db but not ever sent to user
   passwordHash!: string;
+
+  @CreateDateColumn()
+  @Field(() => String)
+  public createdAt!: Date;
+
+  @UpdateDateColumn()
+  @Field(() => String)
+  public updatedAt!: Date;
+
+  @DeleteDateColumn()
+  public deletedAt?: Date;
 }

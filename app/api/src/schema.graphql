@@ -31,10 +31,12 @@ type Query {
 }
 
 type user {
+  createdAt: String!
   email: String!
   id: String!
   isActive: Boolean!
   name: String!
+  updatedAt: String!
 }
 
 type UserIdDto {
