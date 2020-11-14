@@ -12,7 +12,7 @@ module.exports = {
     contentBase: path.join(__dirname, 'dist'),
     compress: env.production,
     historyApiFallback: true,
-    port: 8080,
+    port: 4000,
   },
   entry: './src/index.tsx',
   target: 'web',

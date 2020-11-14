@@ -1,15 +1,44 @@
-import { GlobalStyle } from '@resist/components';
+import {
+  ApolloClient,
+  ApolloLink,
+  ApolloProvider,
+  concat,
+  HttpLink,
+  InMemoryCache,
+} from '@apollo/client';
 import * as React from 'react';
 import ReactDom from 'react-dom';
 import { BrowserRouter as Router } from 'react-router-dom';
 import { App } from './app/app';
 
+let appJWTToken: string;
+const httpLink = new HttpLink({
+  uri: 'http://localhost:3001/graphql',
+});
+const authMiddleware = new ApolloLink((operation, forward) => {
+  console.log('eggs', appJWTToken);
+  if (appJWTToken) {
+    operation.setContext({
+      headers: {
+        Authorization: `Bearer ${appJWTToken}`,
+      },
+    });
+  }
+  return forward(operation);
+});
+
+const apolloClient = new ApolloClient({
+  link: concat(authMiddleware, httpLink),
+  cache: new InMemoryCache(),
+});
+
 ReactDom.render(
   <React.StrictMode>
-    <Router>
-      <GlobalStyle />
-      <App />
-    </Router>
+    <ApolloProvider client={apolloClient}>
+      <Router>
+        <App />
+      </Router>
+    </ApolloProvider>
   </React.StrictMode>,
   document.getElementById('root'),
 );
