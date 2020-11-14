@@ -5,44 +5,67 @@ import { User } from '../user/user.entity';
 import { AuthService } from './auth.service';
 import { CurrentUser } from './decorator/current-user.decorator';
 import { ResGql } from './decorator/res-gql.decorator';
-import { CreateUserDto } from './dto/create-user.dto';
+import { RegisterUserDto } from './dto/register-user.dto';
 import { LoginInputDto } from './dto/login-input.dto';
+import { JwtAuthGuard } from './guard/gql-jwt.guard';
+import { JwtRefreshGuard } from './guard/gql-jwt-refresh.guard';
+import { LoginPayload } from './dto/login-payload.dto';
+import { RefreshPayload } from './dto/refresh-payload.dto';
 import { LogoutPayload } from './dto/logout-payload.dto';
-import { GqlJwtAuthGuard } from './guard/gql-jwt.guard';
 
 @Resolver('Auth')
 export class AuthResolver {
   public constructor(private authService: AuthService) {}
 
-  @Mutation(() => User)
+  @Mutation(() => LoginPayload)
   public async login(
     @Args('input') { name, password }: LoginInputDto,
     @ResGql() res: Response,
-  ): Promise<User> {
-    const { access_token, user } = await this.authService.login(name, password);
-    res.cookie('access_token', access_token, { httpOnly: true });
-    return user;
+  ): Promise<LoginPayload> {
+    const user = await this.authService.getAuthenticatedUser(name, password);
+    const {
+      accessToken,
+      refreshTokenCookie,
+    } = await this.authService.refreshTokens(user);
+
+    res.setHeader('Set-Cookie', [refreshTokenCookie]);
+    return { accessToken, ...user };
   }
 
-  @UseGuards(GqlJwtAuthGuard)
+  @UseGuards(JwtAuthGuard)
   @Mutation(() => LogoutPayload)
   public async logout(
-    @CurrentUser() { name }: User,
+    @CurrentUser() { id, name }: User,
     @ResGql() res: Response,
   ): Promise<LogoutPayload> {
-    res.cookie('access_token', '', {
-      httpOnly: true,
-      expires: new Date(0),
-    });
+    this.authService.clearTokens(id);
+    res.setHeader('Set-Cookie', this.authService.getCookiesForLogout());
     return { name };
   }
 
   @Mutation(() => User)
-  public async createUser(@Args('input') input: CreateUserDto): Promise<User> {
-    return this.authService.createUser(input);
+  public async registerUser(
+    @Args('input') input: RegisterUserDto,
+  ): Promise<User> {
+    return this.authService.registerUser(input);
   }
 
-  @UseGuards(GqlJwtAuthGuard)
+  @UseGuards(JwtRefreshGuard)
+  @Mutation(() => RefreshPayload)
+  public async refresh(
+    @ResGql() res: Response,
+    @CurrentUser() user: User,
+  ): Promise<RefreshPayload> {
+    const {
+      accessToken,
+      refreshTokenCookie,
+    } = await this.authService.refreshTokens(user);
+
+    res.setHeader('Set-Cookie', [refreshTokenCookie]);
+    return { accessToken };
+  }
+
+  @UseGuards(JwtAuthGuard)
   @Query(() => User)
   async me(@CurrentUser() user: User): Promise<User> {
     return user;

@@ -4,18 +4,36 @@ import { v4 as uuid } from 'uuid';
 import { UserService } from '../user/user.service';
 import { asUserId, User, UserId } from '../user/user.entity';
 import { PasswordService } from '../password/password.service';
-import { Token } from './model/token.model';
-import { CreateUserDto } from './dto/create-user.dto';
+import { RefreshTokenPayload, TokenPayload } from './model/token.model';
+import { RegisterUserDto } from './dto/register-user.dto';
+import { ConfigService } from '../config/config.service';
 
 @Injectable()
 export class AuthService {
   constructor(
+    private configService: ConfigService,
     private jwtService: JwtService,
     private passwordService: PasswordService,
     private userService: UserService,
   ) {}
 
-  public async validateUserByPassword(
+  public async refreshTokens(
+    user: User,
+  ): Promise<{ accessToken: string; refreshTokenCookie: string }> {
+    const accessToken = this.getJwtToken(user);
+    const refreshToken = this.getRefreshToken(user);
+
+    await this.userService.setCurrentRefreshToken(refreshToken, user.id);
+
+    const refreshTokenCookie = this.getRefreshCookie(refreshToken);
+    return { accessToken, refreshTokenCookie };
+  }
+
+  public async clearTokens(id: UserId): Promise<void> {
+    await this.userService.removeCurrentRefreshToken(id);
+  }
+
+  public async getAuthenticatedUser(
     username: string,
     password: string,
   ): Promise<User> {
@@ -31,47 +49,50 @@ export class AuthService {
     return user;
   }
 
-  public async validateUserById(id: UserId): Promise<User> {
-    try {
-      // need to await to catch the not found error in case, u no... not found
-      const user = await this.userService.findOne(id);
-      return user;
-    } catch (e) {
-      throw new UnauthorizedException('Authentication validation error');
-    }
+  public async validateToken({ sub }: TokenPayload): Promise<User> {
+    return this.userService.findOne(asUserId(sub));
   }
 
-  public async validateToken({ sub }: { sub: string }): Promise<User> {
-    return this.validateUserById(asUserId(sub));
-  }
-
-  public generateToken<T extends Record<string, unknown>>(payload: T): Token {
-    const access_token = this.jwtService.sign(payload);
-    return { access_token };
-  }
-
-  public async login(
-    username: string,
-    password: string,
-  ): Promise<Token & { user: User }> {
-    let user;
-
-    try {
-      user = await this.validateUserByPassword(username, password);
-    } catch (e) {
-      throw new UnauthorizedException('Authentication validation error');
-    }
-
-    return {
-      ...this.generateToken({ username: user.name, sub: user.id }),
-      user,
-    };
-  }
-
-  public async createUser({ password, ...rest }: CreateUserDto): Promise<User> {
+  public async registerUser({
+    password,
+    ...rest
+  }: RegisterUserDto): Promise<User> {
     const id = asUserId(uuid());
     const passwordHash = await this.passwordService.hashPassword(password);
 
     return this.userService.create({ ...rest, id, passwordHash });
+  }
+
+  public getJwtToken(user: User): string {
+    const payload: TokenPayload = {
+      roles: [],
+      sub: user.id,
+      username: user.name,
+    };
+    const token = this.jwtService.sign(payload, {
+      secret: this.configService.get('JWT_ACCESS_TOKEN_SECRET'),
+      expiresIn: this.configService.get('JWT_ACCESS_TOKEN_EXPIRATION'),
+    });
+    return token;
+  }
+
+  public getRefreshCookie(token: string): string {
+    return `Refresh=${token}; HttpOnly; Path=/; Max-Age=${this.configService.get(
+      'JWT_REFRESH_TOKEN_EXPIRATION',
+    )}`;
+  }
+
+  public getRefreshToken(user: User): string {
+    const payload: RefreshTokenPayload = {
+      sub: user.id,
+    };
+    return this.jwtService.sign(payload, {
+      secret: this.configService.get('JWT_REFRESH_TOKEN_SECRET'),
+      expiresIn: this.configService.get('JWT_REFRESH_TOKEN_EXPIRATION'),
+    });
+  }
+
+  public getCookiesForLogout(): [string] {
+    return ['Refresh; HttpOnly; Path=/; Max-Age=0'];
   }
 }

@@ -4,29 +4,29 @@ import { PasswordModule } from '../password/password.module';
 import { AuthService } from './auth.service';
 import { PassportModule } from '@nestjs/passport';
 import { AuthResolver } from './auth.resolver';
-import { GqlJwtAuthGuard } from './guard/gql-jwt.guard';
+import { JwtAuthGuard } from './guard/gql-jwt.guard';
 import { UserModule } from '../user/user.module';
 import { JwtStrategy } from './strategy/jwt.strategy';
-import { ConfigModule } from '../config/config.module';
-import { ConfigService } from '../config/config.service';
+import { JwtRefreshGuard } from './guard/gql-jwt-refresh.guard';
+import { JwtRefreshTokenStrategy } from './strategy/jwt-refresh.strategy';
 
 @Module({
   imports: [
-    JwtModule.registerAsync({
-      imports: [ConfigModule],
-      inject: [ConfigService],
-      useFactory: async (config: ConfigService) => ({
-        secret: config.get('JWT_SECRET'),
-        signOptions: { expiresIn: '1000s' },
-      }),
-    }),
+    JwtModule.register({}),
     PassportModule.register({
       defaultStrategy: 'jwt',
     }),
     PasswordModule,
     UserModule,
   ],
-  providers: [AuthResolver, AuthService, GqlJwtAuthGuard, JwtStrategy],
-  exports: [GqlJwtAuthGuard],
+  providers: [
+    AuthResolver,
+    AuthService,
+    JwtAuthGuard,
+    JwtStrategy,
+    JwtRefreshGuard,
+    JwtRefreshTokenStrategy,
+  ],
+  exports: [JwtAuthGuard],
 })
 export class AuthModule {}

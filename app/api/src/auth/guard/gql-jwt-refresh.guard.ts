@@ -4,7 +4,7 @@ import { Observable } from 'rxjs';
 import { getGqlRequest } from '../decorator/req-gql.decorator';
 
 @Injectable()
-export class JwtAuthGuard extends AuthGuard('jwt') {
+export class JwtRefreshGuard extends AuthGuard('jwt-refresh-token') {
   public getRequest(context: ExecutionContext) {
     return getGqlRequest(context);
   }

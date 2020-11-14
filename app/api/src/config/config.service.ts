@@ -10,7 +10,10 @@ export default interface EnvConfig {
 
 const keys = [
   'APP_PORT',
-  'JWT_SECRET',
+  'JWT_ACCESS_TOKEN_SECRET',
+  'JWT_ACCESS_TOKEN_EXPIRATION',
+  'JWT_REFRESH_TOKEN_SECRET',
+  'JWT_REFRESH_TOKEN_EXPIRATION',
   'DB_CONNECTION',
   'DB_HOST',
   'DB_USERNAME',
@@ -89,6 +92,10 @@ export class ConfigService {
       APP_PORT: Joi.number().default(3001),
       DB_TYPE: Joi.string().valid('postgres').default('postgres'),
       DB_PORT: Joi.number().default(54320),
+      JWT_ACCESS_TOKEN_EXPIRATION: Joi.string().required(),
+      JWT_ACCESS_TOKEN_SECRET: Joi.string().required(),
+      JWT_REFRESH_TOKEN_EXPIRATION: Joi.string().required(),
+      JWT_REFRESH_TOKEN_SECRET: Joi.string().required(),
     }).unknown(true);
     const { error, value: validatedEnvConfig } = envVarsSchema.validate(
       rawConfig,

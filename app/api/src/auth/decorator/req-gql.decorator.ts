@@ -7,6 +7,6 @@ export function getGqlRequest(context: ExecutionContext): any {
   return graphqlContext.getContext<CustomGraphQLContext>()?.req || null;
 }
 
-export const ResGql = createParamDecorator((_, context: ExecutionContext) =>
+export const ReqGql = createParamDecorator((_, context: ExecutionContext) =>
   getGqlRequest(context),
 );

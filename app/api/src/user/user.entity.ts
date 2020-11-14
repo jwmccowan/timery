@@ -48,6 +48,9 @@ export class User {
   // No GQL Field since we want it in db but not ever sent to user
   passwordHash!: string;
 
+  @Column({ nullable: true })
+  public currentRefreshTokenHash?: string;
+
   @CreateDateColumn()
   @Field(() => String)
   public createdAt!: Date;

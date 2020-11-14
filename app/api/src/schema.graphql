@@ -2,15 +2,19 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
-input CreateUserDto {
-  email: String!
+input LoginInputDto {
   name: String!
   password: String!
 }
 
-input LoginInputDto {
+type LoginPayload {
+  accessToken: String!
+  createdAt: String!
+  email: String!
+  id: String!
+  isActive: Boolean!
   name: String!
-  password: String!
+  updatedAt: String!
 }
 
 type LogoutPayload {
@@ -18,16 +22,27 @@ type LogoutPayload {
 }
 
 type Mutation {
-  createUser(input: CreateUserDto!): user!
   deleteUser(id: String!): UserIdDto!
-  login(input: LoginInputDto!): user!
+  login(input: LoginInputDto!): LoginPayload!
   logout: LogoutPayload!
+  refresh: RefreshPayload!
+  registerUser(input: RegisterUserDto!): user!
 }
 
 type Query {
   me: user!
   user(id: String!): user!
   users: [user!]!
+}
+
+type RefreshPayload {
+  accessToken: String!
+}
+
+input RegisterUserDto {
+  email: String!
+  name: String!
+  password: String!
 }
 
 type user {

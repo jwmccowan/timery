@@ -1,5 +1,6 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { compare, hash } from 'bcrypt';
 import { Repository } from 'typeorm';
 import { User, UserId } from './user.entity';
 
@@ -62,5 +63,40 @@ export class UserService {
     user: Pick<User, 'id' | 'passwordHash' | 'name' | 'email'>,
   ): Promise<User> {
     return this.userRepository.save({ ...user, isActive: true });
+  }
+
+  public async setCurrentRefreshToken(
+    refreshToken: string,
+    id: UserId,
+  ): Promise<void> {
+    const currentRefreshTokenHash = await hash(refreshToken, 10);
+    await this.userRepository.update(id, {
+      currentRefreshTokenHash,
+    });
+  }
+
+  public async removeCurrentRefreshToken(id: UserId): Promise<void> {
+    await this.userRepository.update(id, {
+      currentRefreshTokenHash: undefined,
+    });
+  }
+
+  public async getUserIfRefreshTokenMatches(
+    refreshToken: string,
+    id: UserId,
+  ): Promise<User> {
+    const user = await this.findOne(id);
+
+    console.log('eggs', 'user', user);
+
+    const doesRefreshTokenMatch = await compare(
+      refreshToken,
+      user.currentRefreshTokenHash ?? '',
+    );
+    if (!doesRefreshTokenMatch) {
+      throw new NotFoundException('Refresh token does not match');
+    }
+
+    return user;
   }
 }
