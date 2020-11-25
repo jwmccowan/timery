@@ -24,10 +24,11 @@ export class UserResolver {
   async deleteUser(
     @Args('id', { type: () => String }) id: UserId,
   ): Promise<UserIdDto> {
-    const success = await this.userService.remove(id);
-    if (!success) {
+    try {
+      await this.userService.remove(id);
+      return { id };
+    } catch {
       throw new NotFoundException('User not found - nothing was deleted');
     }
-    return { id };
   }
 }

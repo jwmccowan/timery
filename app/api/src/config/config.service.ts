@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import * as dotenv from 'dotenv';
 import * as Joi from '@hapi/joi';
 import * as path from 'path';
-import { TypeOrmModuleOptions } from '@nestjs/typeorm';
+import { MikroOrmModuleOptions } from '@mikro-orm/nestjs';
 
 export default interface EnvConfig {
   [key: string]: string;
@@ -34,34 +34,32 @@ export class ConfigService {
     return this.envConfig[key];
   }
 
-  public getTypeORMConfig(): TypeOrmModuleOptions {
-    const isDevelopment = process.env.NODE_ENV !== 'production';
-    const rootDir = isDevelopment ? 'src' : 'dist';
-    const entitiesPath = path.join(
-      __dirname,
-      '../../',
-      rootDir,
-      '**/*.entity{.ts,.js}',
-    );
-    const migrationsPath = path.join(
-      __dirname,
-      '../../',
-      rootDir,
-      'database/migration/*{.ts,.js}',
-    );
+  public getMikroOrmConfig(): MikroOrmModuleOptions {
+    const entities = path.join('./dist', '**/*.entity{.ts,.js}');
+    const entitiesTs = path.join('./src', '**/*.entity{.ts,.js}');
+    const migrationPath = path.join('./src', 'database/migration');
+    console.log('eggs', entitiesTs, entities, migrationPath);
+
     return {
-      type: this.envConfig.DB_CONNECTION as 'postgres',
+      type: this.envConfig.DB_CONNECTION as 'postgresql',
       host: this.envConfig.DB_HOST,
       port: Number.parseInt(this.envConfig.DB_PORT, 10),
-      username: this.envConfig.DB_USERNAME,
+      user: this.envConfig.DB_USERNAME,
       password: this.envConfig.DB_PASSWORD,
-      database: this.envConfig.DB_DATABASE,
-      entities: [entitiesPath],
-      migrations: [migrationsPath],
-      cli: {
-        migrationsDir: 'src/database/migration',
+      dbName: this.envConfig.DB_DATABASE,
+      entities: [entities],
+      entitiesTs: [entitiesTs],
+      migrations: {
+        tableName: 'mikro_orm_migrations', // name of database table with log of executed transactions
+        path: migrationPath, // path to the folder with migrations
+        // pattern: /^[\w-]+\d+\.ts$/, // regex pattern for the migration files
+        transactional: true, // wrap each migration in a transaction
+        disableForeignKeys: true, // wrap statements with `set foreign_key_checks = 0` or equivalent
+        allOrNothing: true, // wrap all migrations in master transaction
+        dropTables: true, // allow to disable table dropping
+        safe: false, // allow to disable table and column dropping
+        emit: 'ts', // migration generation mode
       },
-      // migrationsRun: this.envConfig.DB_RUN === 'true',
     };
   }
 

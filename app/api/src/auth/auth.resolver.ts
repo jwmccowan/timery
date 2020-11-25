@@ -29,7 +29,7 @@ export class AuthResolver {
     } = await this.authService.refreshTokens(user);
 
     res.setHeader('Set-Cookie', [refreshTokenCookie]);
-    return { accessToken, ...user };
+    return { accessToken, user };
   }
 
   @UseGuards(JwtAuthGuard)

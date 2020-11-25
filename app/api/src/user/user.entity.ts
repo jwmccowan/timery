@@ -1,16 +1,16 @@
-import {
-  Column,
-  CreateDateColumn,
-  DeleteDateColumn,
-  Entity,
-  PrimaryColumn,
-  UpdateDateColumn,
-} from 'typeorm';
+import { Entity, EntityRepositoryType, Property } from '@mikro-orm/core';
 import { Field, ObjectType } from '@nestjs/graphql';
+import { Brand, createBrander } from '../utils';
+import { BaseNodeEntity } from '../database/base.entity';
+import { UserRepository } from './user.repository';
+import { UUID } from '../common/types';
+import { UserValidator } from './user.validator';
+
 /**
  * UserId: a special wrapper for string to let us know this is a UserId
  */
-export type UserId = string & { __brand: 'UserId' };
+export type UserId = Brand<UUID, 'UserId'>;
+
 /**
  * Takes a string and returns a UserId
  * Make sure it's a UUID or it'll be weird!
@@ -18,48 +18,38 @@ export type UserId = string & { __brand: 'UserId' };
  * @param id UUID to be made into a UserId
  * @returns UserId
  */
-export const asUserId = (id: string): UserId => id as UserId;
+export const asUserId = createBrander<UserId>();
 
 /**
  * User
  *
  * The User type to be used throughout the app
  */
-@Entity('user')
+@Entity({ tableName: 'user' })
 @ObjectType('user')
-export class User {
-  @PrimaryColumn({ type: 'uuid' })
+export class User extends BaseNodeEntity<User, UserId> {
+  @Property({ nullable: false, type: String, unique: true })
   @Field(() => String)
-  id!: UserId;
+  public name!: string;
 
-  @Column({ nullable: false, unique: true })
+  @Property({ nullable: false, type: String })
   @Field(() => String)
-  name!: string;
+  public email!: string;
 
-  @Column({ nullable: false })
-  @Field(() => String)
-  email!: string;
-
-  @Column({ default: true, nullable: false })
+  @Property({ default: true, nullable: false, type: Boolean })
   @Field(() => Boolean)
-  isActive!: boolean;
+  public isActive = true;
 
-  @Column({ nullable: false })
+  @Property({ nullable: false, type: String })
   // No GQL Field since we want it in db but not ever sent to user
-  passwordHash!: string;
+  public passwordHash!: string;
 
-  @Column({ nullable: true })
-  public currentRefreshTokenHash?: string;
+  @Property({ nullable: true, type: String })
+  public currentRefreshTokenHash?: string | null;
 
-  @CreateDateColumn()
-  @Field(() => String)
-  public createdAt!: Date;
+  public [EntityRepositoryType]?: UserRepository;
 
-  @UpdateDateColumn()
-  @Field(() => String)
-  public updatedAt!: Date;
-
-  @DeleteDateColumn()
-  // No GQL Field since it shouldn't ever be not null if queried
-  public deletedAt?: Date;
+  public constructor(body: UserValidator) {
+    super(body);
+  }
 }
