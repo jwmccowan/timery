@@ -11,12 +11,11 @@ import ReactDom from 'react-dom';
 import { BrowserRouter as Router } from 'react-router-dom';
 import { App } from './app/app';
 
-let appJWTToken: string;
 const httpLink = new HttpLink({
   uri: 'http://localhost:3001/graphql',
 });
 const authMiddleware = new ApolloLink((operation, forward) => {
-  console.log('eggs', appJWTToken);
+  const appJWTToken = localStorage.getItem('token');
   if (appJWTToken) {
     operation.setContext({
       headers: {
