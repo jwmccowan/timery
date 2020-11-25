@@ -1,8 +1,7 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { v4 as uuid } from 'uuid';
 import { UserService } from '../user/user.service';
-import { asUserId, User, UserId } from '../user/user.entity';
+import { User, UserId } from '../user/user.entity';
 import { PasswordService } from '../password/password.service';
 import { RefreshTokenPayload, TokenPayload } from './model/token.model';
 import { RegisterUserDto } from './dto/register-user.dto';
@@ -50,17 +49,15 @@ export class AuthService {
   }
 
   public async validateToken({ sub }: TokenPayload): Promise<User> {
-    return this.userService.findOne(asUserId(sub));
+    return this.userService.findOne(sub);
   }
 
   public async registerUser({
     password,
     ...rest
   }: RegisterUserDto): Promise<User> {
-    const id = asUserId(uuid());
     const passwordHash = await this.passwordService.hashPassword(password);
-
-    return this.userService.create({ ...rest, id, passwordHash });
+    return this.userService.create({ ...rest, passwordHash });
   }
 
   public getJwtToken(user: User): string {

@@ -2,6 +2,11 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
+"""
+A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+"""
+scalar DateTime
+
 input LoginInputDto {
   name: String!
   password: String!
@@ -9,12 +14,7 @@ input LoginInputDto {
 
 type LoginPayload {
   accessToken: String!
-  createdAt: String!
-  email: String!
-  id: String!
-  isActive: Boolean!
-  name: String!
-  updatedAt: String!
+  user: user!
 }
 
 type LogoutPayload {
@@ -46,12 +46,12 @@ input RegisterUserDto {
 }
 
 type user {
-  createdAt: String!
+  createdAt: DateTime!
   email: String!
-  id: String!
+  id: ID!
   isActive: Boolean!
   name: String!
-  updatedAt: String!
+  updatedAt: DateTime!
 }
 
 type UserIdDto {

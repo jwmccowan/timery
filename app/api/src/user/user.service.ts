@@ -1,15 +1,11 @@
+import { EntityManager } from '@mikro-orm/core';
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
 import { compare, hash } from 'bcrypt';
-import { Repository } from 'typeorm';
 import { User, UserId } from './user.entity';
 
 @Injectable()
 export class UserService {
-  constructor(
-    @InjectRepository(User)
-    private readonly userRepository: Repository<User>,
-  ) {}
+  constructor(private readonly em: EntityManager) {}
 
   /**
    * findAll()
@@ -19,7 +15,7 @@ export class UserService {
    * @returns User[] - list of all Users
    */
   public async findAll(): Promise<User[]> {
-    return this.userRepository.find();
+    return this.em.getRepository(User).findAll();
   }
 
   /**
@@ -31,7 +27,7 @@ export class UserService {
    * @returns Promise<User> - User with the id
    */
   public async findOne(id: UserId): Promise<User> {
-    return this.userRepository.findOneOrFail(id);
+    return this.em.getRepository(User).findOneOrFail(id);
   }
   /**
    * findOne(name)
@@ -43,7 +39,7 @@ export class UserService {
    * @returns Promise<User> - User with the name
    */
   public async findOneByName(name: string): Promise<User> {
-    return this.userRepository.findOneOrFail({ name });
+    return this.em.getRepository(User).findOneOrFail({ name });
   }
 
   /**
@@ -54,15 +50,25 @@ export class UserService {
    * @returns Promise<Boolean> - whether the user was deleted or not
    * TODO: always returns true
    */
-  public async remove(id: UserId): Promise<boolean> {
-    const result = await this.userRepository.softDelete(id);
-    return !!result.affected && result.affected > 0;
+  public async remove(id: UserId): Promise<void> {
+    const user = await this.findOne(id);
+    user.deletedAt = new Date();
+    await this.em.flush();
   }
 
-  public async create(
-    user: Pick<User, 'id' | 'passwordHash' | 'name' | 'email'>,
-  ): Promise<User> {
-    return this.userRepository.save({ ...user, isActive: true });
+  public async create({
+    email,
+    name,
+    passwordHash,
+  }: Pick<User, 'passwordHash' | 'name' | 'email'>): Promise<User> {
+    const user = new User({
+      email,
+      name,
+      passwordHash,
+    });
+    console.log('eggs', this.em);
+    await this.em.persistAndFlush(user);
+    return user;
   }
 
   public async setCurrentRefreshToken(
@@ -70,15 +76,16 @@ export class UserService {
     id: UserId,
   ): Promise<void> {
     const currentRefreshTokenHash = await hash(refreshToken, 10);
-    await this.userRepository.update(id, {
-      currentRefreshTokenHash,
-    });
+
+    const user = await this.findOne(id);
+    user.currentRefreshTokenHash = currentRefreshTokenHash;
+    await this.em.flush();
   }
 
   public async removeCurrentRefreshToken(id: UserId): Promise<void> {
-    await this.userRepository.update(id, {
-      currentRefreshTokenHash: undefined,
-    });
+    const user = await this.findOne(id);
+    user.currentRefreshTokenHash = null;
+    await this.em.flush();
   }
 
   public async getUserIfRefreshTokenMatches(
@@ -86,8 +93,6 @@ export class UserService {
     id: UserId,
   ): Promise<User> {
     const user = await this.findOne(id);
-
-    console.log('eggs', 'user', user);
 
     const doesRefreshTokenMatch = await compare(
       refreshToken,
